@@ -5,7 +5,8 @@ class FlightsController < ApplicationController
   before_action :set_flight, only: %i[edit update destroy]
 
   def index
-    @flights = Flight.all
+    @depart_flights = Flight.where(from: 'Dhaka Airport')
+    @arrival_flights = Flight.where(from: 'Sylhet Airport')
   end
 
   def new
@@ -15,9 +16,9 @@ class FlightsController < ApplicationController
   def create
     @flight = Flight.new(flight_params)
     if @flight.save
-      redirect_to root_path, notice: 'Delete Successful'
+      redirect_to root_path, notice: 'Flight Created'
     else
-      flash[:error] = 'Failed to edit Flight!'
+      flash[:error] = 'Failed to create Flight!'
       render :new
     end
   end
