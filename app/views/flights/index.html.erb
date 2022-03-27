@@ -1,1 +1,65 @@
-<h1>Welcome to Airport Flight Scheduler</h1>
+<div class="content">
+  <div class="container">
+    <div class="mt-5">
+
+      <div class="d-flex justify-content-center">
+        <h1>Welcome on Board</h1>
+      </div>
+
+
+      <div class="d-flex justify-content-end mt-4">
+        <%= link_to 'Add New Flight', new_flight_path, class: 'mb-3 float-end btn btn-outline-dark' %>
+      </div>
+      <div class="d-flex justify-content-center my-4">
+        <h3>Departure Dashboard</h3>
+      </div>
+
+      <table class="table table-bordered table-striped table-hover mb-5">
+        <thead class="table-dark text-center">
+        <tr>
+          <th>Arrivals</th>
+          <th>Take off Time</th>
+          <th>Landing Time</th>
+          <th>Flight Status</th>
+        </tr>
+        </thead>
+        <tbody class="text-center">
+        <% @depart_flights.map do |flight| %>
+          <tr>
+            <td><%= flight.to %></td>
+            <td><%= flight.departure.strftime('%d %b, %Y, %k:%M:%S %Z') %></td>
+            <td><%= flight.arrival.strftime('%d %b, %Y, %k:%M:%S %Z') %></td>
+            <td><%= flight.status.humanize %></td>
+          </tr>
+        <% end %>
+        </tbody>
+      </table>
+
+      <div class="mt-5 d-flex justify-content-center">
+        <h3>Arrival Dashboard</h3>
+      </div>
+
+      <table class="table table-bordered table-striped table-hover mt-4">
+        <thead class="table-dark text-center">
+        <tr>
+          <th>Departed From</th>
+          <th>Take off Time</th>
+          <th>Landing Time</th>
+          <th>Flight Status</th>
+        </tr>
+        </thead>
+        <tbody class="text-center">
+        <% @arrival_flights.map do |flight| %>
+          <tr>
+            <td><%= flight.to %></td>
+            <td><%= flight.departure.strftime('%d %b, %Y, %k:%M:%S %Z') %></td>
+            <td><%= flight.arrival.strftime('%d %b, %Y, %k:%M:%S %Z') %></td>
+            <td><%= flight.status.humanize %></td>
+          </tr>
+        <% end %>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+</div>
