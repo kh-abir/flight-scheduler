@@ -1,0 +1,35 @@
+<div class="container my-5">
+  <div class="row">
+    <div class="col-md-3"></div>
+    <div class="col-md-6 my-5">
+      <div class="d-flex justify-content-center my-5">
+        <h1>Add New Flight</h1>
+      </div>
+      <%= form_for @flight, url: flights_path, method: :post do |f| %>
+        <div class="input-group mb-4">
+          <%= f.text_field :from, class: 'form-control', placeholder: 'Depart from...', required: true %>
+          <%= f.text_field :to, class: 'form-control', placeholder: 'Arrive to...', required: true %>
+        </div>
+
+        <div class="input-group mb-4">
+          <%= f.select :status, Flight.statuses.keys.map { |key| [key.humanize, key] }, { prompt: "Select a Status"}, {class: 'form-control', required: true } %>
+        </div>
+
+        <div class="input-group mb-4">
+          Take off Time: &nbsp;&nbsp;&nbsp;
+          <%= f.datetime_select :departure, { ampm: true, order: [:day, :month, :year] } %>
+        </div>
+        <div class="input-group mb-4">
+          Landing Time: &nbsp;&nbsp;&nbsp;
+          <%= f.datetime_select :arrival, { ampm: true, order: [:day, :month, :year] } %>
+
+        </div>
+        <div class="d-flex justify-content-between">
+          <%= f.submit 'Add Flight', class: 'btn btn-md btn-outline-dark form-control' %>
+          <%= link_to 'Cancel', :back, class: 'btn btn-md btn-outline-danger form-control' %>
+        </div>
+      <% end %>
+    </div>
+    <div class="col-md-3"></div>
+  </div>
+</div>
