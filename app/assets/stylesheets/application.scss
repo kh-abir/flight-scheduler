@@ -12,4 +12,9 @@
  *
  *= require_tree .
  *= require_self
+ *= require bootstrap
  */
+
+body {
+  background-image: linear-gradient(110deg, #E4EfE9, #93A5CF);
+}
