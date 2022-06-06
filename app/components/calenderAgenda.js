@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {View, TouchableOpacity} from 'react-native';
 import {Agenda} from 'react-native-calendars';
 import { COLORS } from '../constants/theme';
@@ -32,8 +32,8 @@ const CalendarAgenda = (props) => {
   const appendAppointments = appointments => {
     appointments.map(appointment => {
       const appointmentDate = moment(appointment.start_at).format("YYYY-MM-DD");
-      if(items[appointmentDate] === undefined) items[appointmentDate] = [];
-      if (_.findWhere(items[appointmentDate], appointment) === undefined) {
+      if (items[appointmentDate] === undefined) items[appointmentDate] = [];
+      if (_.find(items[appointmentDate], { 'id': appointment.id }) === undefined) {
         items[appointmentDate].push(appointment);
       }
     });
