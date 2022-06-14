@@ -1,13 +1,8 @@
 import React from 'react'
-import {
-  Platform,
-  View,
-  Text,
-  StyleSheet,
-} from 'react-native';
-import { COLORS, SIZES } from '../constants/theme';
+import { Platform, View, Text, StyleSheet } from 'react-native'
+import { COLORS, SIZES } from '../constants/theme'
 
-import DropDownPicker from 'react-native-dropdown-picker';
+import DropDownPicker from 'react-native-dropdown-picker'
 
 const CustomDropdown = ({
   open,
@@ -16,16 +11,17 @@ const CustomDropdown = ({
   value,
   setValue,
   onChange,
+  disabled,
   items,
   formFieldID,
   searchPlaceholder,
   formObject,
   setFormObject,
 }) => {
-  const handleSelectItem = item => {
+  const handleSelectItem = (item) => {
     setFormObject({
       ...formObject,
-      [formFieldID]: item.id
+      [formFieldID]: item.id,
     })
   }
 
@@ -35,23 +31,27 @@ const CustomDropdown = ({
       <DropDownPicker
         open={open}
         setOpen={setOpen}
-        placeholder="Select an item"
+        placeholder={`Select ${label}`}
         value={value}
         setValue={setValue}
         items={items}
-        onSelectItem={item => handleSelectItem(item)}
+        onSelectItem={(item) => handleSelectItem(item)}
         searchable={true}
         style={styles.dropdownContainer}
-        labelStyle={{fontWeight: "bold"}}
-        selectedItemLabelStyle={{fontWeight: "bold"}}
+        labelStyle={{ fontWeight: 'bold' }}
+        selectedItemLabelStyle={{ fontWeight: 'bold' }}
+        disabled={disabled}
+        disabledStyle={{
+          opacity: 0.5,
+        }}
         searchPlaceholder={searchPlaceholder}
         searchContainerStyle={{
           borderBottomColor: COLORS.darkBlue,
           paddingBottom: 0,
         }}
-        searchTextInputStyle={{borderWidth: 0}}
+        searchTextInputStyle={{ borderWidth: 0 }}
         listMode="MODAL"
-        modalProps={{animationType: "slide", statusBarTranslucent: true}}
+        modalProps={{ animationType: 'slide', statusBarTranslucent: true }}
         modalContentContainerStyle={{
           backgroundColor: COLORS.secondary,
           paddingTop: 40,
@@ -61,85 +61,36 @@ const CustomDropdown = ({
   )
 }
 
-export default CustomDropdown;
+export default CustomDropdown
 
 const styles = StyleSheet.create({
   dropdownContainer: {
     backgroundColor: COLORS.secondary,
-    borderWidth: 0.6,
-    borderRadius: 3
+    borderColor: COLORS.darkGray,
+    borderWidth: 0.8,
+    borderRadius: 3,
+    height: 58,
   },
   dropdownLabel: {
     fontSize: 12,
-    fontWeight: "100",
-    color: COLORS.gray,
+    fontWeight: '300',
+    color: COLORS.darkGray,
     backgroundColor: COLORS.secondary,
     top: 7,
     left: 10,
     zIndex: 9999999,
     alignSelf: 'flex-start',
     borderRadius: 7,
-    paddingHorizontal: 3
-  },
-  container: {
-    paddingTop: Platform.OS === 'ios' ? 0 : 50,
-    backgroundColor: COLORS.secondary,
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  logo: {
-      marginTop: 20,
-      marginBottom: 10,
-      height: 75,
-      width: 200
+    paddingHorizontal: 3,
   },
 
   inputView: {
-      flex: 1,
-    width: "85%",
-        marginBottom: 20,
-        margin: 2,
-        paddingLeft: 5,
-        // flexDirection: "row",
-        justifyContent: "flex-start",
-  },
-
-  textBoxIcon: {
-      paddingTop: 16,
-      paddingRight: 10,
-  },
-
-  loginBtn: {
-        width: "90%",
-        borderRadius: 10,
-        height: 40,
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
-        marginVertical: 20,
-        backgroundColor: COLORS.blue,
-        shadowColor: 'rgba(0, 0, 0, 0.1)',
-        shadowOpacity: 0.8,
-        elevation: 6,
-        shadowRadius: 15,
-        shadowOffset: {width: 1, height: 13},
-  },
-    
-  loginText: {
-      color: 'white',
-      marginLeft: 5,
-    fontWeight: "bold",
-      fontSize: 16
-  },
-  untilText: {
-    marginHorizontal: 5,
-    paddingVertical: 20,
-    fontSize: 16,
-  },
-  textInput: {
     flex: 1,
-    backgroundColor: COLORS.secondary,
-  }
-});
+    width: '85%',
+    marginBottom: 20,
+    marginTop: -5,
+    paddingLeft: 5,
+    // flexDirection: "row",
+    justifyContent: 'flex-start',
+  },
+})

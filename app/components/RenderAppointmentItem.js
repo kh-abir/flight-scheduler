@@ -23,8 +23,16 @@ const RenderAppointmentItem = ({ item, onPress }) => {
   const printRow = (left, right) => {
     return(
         <DataTable.Row>
-          <DataTable.Cell>{left}</DataTable.Cell>
-          <DataTable.Cell style={{flex: 2}}>{right}</DataTable.Cell>
+        <DataTable.Cell 
+          textStyle={{
+            color: COLORS.black,
+            fontSize: 16,
+            fontWeight: 'bold'
+          }}
+        >
+          {left}
+        </DataTable.Cell>
+          <DataTable.Cell style={{flex: 2, paddingLeft: 10,}}>{right}</DataTable.Cell>
         </DataTable.Row>
     )
   }
@@ -34,7 +42,7 @@ const RenderAppointmentItem = ({ item, onPress }) => {
         style={{marginRight: 10, marginTop: 17}}>
         <View
             style={{
-              backgroundColor: COLORS.transparentWhite
+              backgroundColor: COLORS.white2
             }}>
           <DataTable>
             {printRow('ID', id)}

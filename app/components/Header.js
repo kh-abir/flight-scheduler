@@ -1,7 +1,7 @@
 import React from "react";
 import {View, Text} from "react-native";
 
-const Header = ({containerStyle, title, leftComponent}) => {
+const Header = ({containerStyle, title, leftComponent, rightComponent}) => {
     return (
         <View
             style={{
@@ -13,7 +13,6 @@ const Header = ({containerStyle, title, leftComponent}) => {
             {leftComponent}
 
             {/*Title*/}
-
             <View
                 style={{
                     flex: 1,
@@ -21,10 +20,11 @@ const Header = ({containerStyle, title, leftComponent}) => {
                     justifyContent: 'center'
                 }}
             >
-                <Text>{title}</Text>
+                <Text style={{fontSize: 20, fontWeight: 'bold', left: -13}}>{title}</Text>
             </View>
 
             {/*Right*/}
+            {rightComponent}
         </View>
     )
 

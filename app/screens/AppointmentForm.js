@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import _ from 'underscore';
+import React, { useState, useEffect } from 'react'
 import {
   Platform,
   View,
@@ -7,178 +6,229 @@ import {
   StyleSheet,
   TouchableOpacity,
   SafeAreaView,
-  ActivityIndicator
-} from 'react-native';
-import {ScrollView} from 'react-native-gesture-handler';
-import {AntDesign} from '@expo/vector-icons';
-import { COLORS, SIZES } from '../constants/theme';
-import Header from '../components/Header';
-import moment from "moment";
-import BackButton from '../components/BackButton';
-import { TextInput } from 'react-native-paper';
-import { useEffect } from 'react';
-import CustomDropdown from '../components/CustomDropdown';
-import CustomDatepicker from '../components/CustomDatepicker';
-import axios from 'axios';
-import { BASE_URL_APP } from '@env';
-import { useNavigationState } from '@react-navigation/native';
-import Loader from '../components/Loader';
+  ActivityIndicator,
+} from 'react-native'
+import _ from 'underscore'
+import { ScrollView } from 'react-native-gesture-handler'
+import { AntDesign } from '@expo/vector-icons'
+import { COLORS, SIZES } from '../constants/theme'
+import Header from '../components/Header'
+import moment from 'moment'
+import BackButton from '../components/BackButton'
+import { TextInput } from 'react-native-paper'
+import CustomDropdown from '../components/CustomDropdown'
+import CustomDatepicker from '../components/CustomDatepicker'
+import axios from 'axios'
+import { BASE_URL_APP } from '@env'
+import { useNavigationState } from '@react-navigation/native'
+import Loader from '../components/Loader'
 
 const AppointmentForm = (props) => {
-  const { route, navigation } = props;
-  const response = route.params.item;
-  const { appointment, locations, service_codes, clinicians, patients, procedure_code_modifiers, frequencies } = response;
+  const { route, navigation } = props
+  const response = route.params.item
+  const {
+    appointment,
+    locations,
+    service_codes,
+    clinicians,
+    patients,
+    procedure_code_modifiers,
+    frequencies,
+  } = response
   // const { id, clinician_id, start_at, end_at, location_id, patient_id, procedure_code_modifier_id, service_code_id } = appointment;
 
-  const [isLoading, setIsLoading] = useState(false);
-  const selectedItem = (list, val) => _.find(list, { 'id': val });
-    // Dropdown List
+  const [isLoading, setIsLoading] = useState(false)
+  const selectedItem = (list, val) => _.find(list, { id: val })
+  // Dropdown List
   const buildDropdownList = (items, key) => {
-    return items.map( item => {
-      return {id: item.id, label: item[key], value: item[key] }
-    });
+    return items.map((item) => {
+      return { id: item.id, label: item[key], value: item[key] }
+    })
   }
-  const cliniciansList = buildDropdownList(clinicians, 'name');
-  const codeModifierList = buildDropdownList(selectedItem(clinicians, (appointment?.clinician_id || clinicians[1].id))?.procedure_code_modifiers, 'name');
-  const clientsList = buildDropdownList(patients, 'name');
-  const serviceCodesList = buildDropdownList(service_codes, 'description');
-  const unitsList = []; for (let i = 1; i <= 32; i++) unitsList.push({id: i, label: i, value: i })
-  const locationsList = buildDropdownList(locations, 'name');
-  const frequencyList = frequencies.map( item => {return {id: item, label: item, value: item }});
+  const cliniciansList = buildDropdownList(clinicians, 'name')
+  const codeModifierList = buildDropdownList(
+    selectedItem(clinicians, appointment?.clinician_id || 277)
+      ?.procedure_code_modifiers,
+    'name',
+  )
+  const clientsList = buildDropdownList(patients, 'name')
+  const serviceCodesList = buildDropdownList(service_codes, 'description')
+  const unitsList = []
+  for (let i = 1; i <= 32; i++) unitsList.push({ id: i, label: i, value: i })
+  const locationsList = buildDropdownList(locations, 'name')
+  const frequencyList = frequencies.map((item) => {
+    return { id: item, label: item, value: item }
+  })
   // Selected States
-  const [clinician, setClinician] = useState(selectedItem(clinicians, appointment?.clinician_id)?.name);
-  const [client, setClient] = useState(selectedItem(patients, appointment?.patient_id)?.name);
-  const [serviceCode, setServiceCode] = useState(selectedItem(service_codes, appointment?.service_code_id)?.description);
-  const [location, setLocation] = useState(selectedItem(locations, appointment?.location_id)?.name);
-  const [frequency, setFrequency] = useState(appointment?.frequency);
-  const [units, setUnits] = useState(appointment?.units);
-  const [reminder, setReminder] = useState(null);
-  const [payer, setPayer] = useState(null);
-  const [codeModifier, setCodeModifier] = useState(selectedItem(selectedItem(clinicians, appointment?.clinician_id)?.procedure_code_modifiers, appointment?.procedure_code_modifier_id)?.name);
+  const [clinician, setClinician] = useState(
+    selectedItem(clinicians, appointment?.clinician_id || 277)?.name,
+  )
+  const [client, setClient] = useState(
+    selectedItem(patients, appointment?.patient_id)?.name,
+  )
+  const [serviceCode, setServiceCode] = useState(
+    selectedItem(service_codes, appointment?.service_code_id)?.description,
+  )
+  const [location, setLocation] = useState(
+    selectedItem(locations, appointment?.location_id)?.name,
+  )
+  const [frequency, setFrequency] = useState(appointment?.frequency)
+  const [units, setUnits] = useState(appointment?.units)
+  const [reminder, setReminder] = useState(null)
+  const [payer, setPayer] = useState(null)
+  const [codeModifier, setCodeModifier] = useState(
+    selectedItem(
+      selectedItem(clinicians, appointment?.clinician_id)
+        ?.procedure_code_modifiers,
+      appointment?.procedure_code_modifier_id,
+    )?.name,
+  )
 
   // Dropdown openner States
-  const [clinicianDropDown, setClinicianDropDown] = useState(false);
-  const [codeModifierDropDown, setCodeModifierDropDown] = useState(false);
-  const [clientDropDown, setClientDropDown] = useState(false);
-  const [serviceCodeDropDown, setServiceCodeDropDown] = useState(false);
-  const [locationDropDown, setLocationDropDown] = useState(false);
-  const [frequencyDropDown, setFrequencyDropDown] = useState(false);
-  const [unitsDropDown, setUnitsDropDown] = useState(false);
+  const [clinicianDropDown, setClinicianDropDown] = useState(false)
+  const [codeModifierDropDown, setCodeModifierDropDown] = useState(false)
+  const [clientDropDown, setClientDropDown] = useState(false)
+  const [serviceCodeDropDown, setServiceCodeDropDown] = useState(false)
+  const [locationDropDown, setLocationDropDown] = useState(false)
+  const [frequencyDropDown, setFrequencyDropDown] = useState(false)
+  const [unitsDropDown, setUnitsDropDown] = useState(false)
 
   // Date States
-  const [date, setDate] = useState(new Date(appointment?.start_at || Date.now()));
-  const [scheduledUntil, setScheduledUntil] = useState(new Date(appointment?.scheduled_until || Date.now()));
-  const [startTime, setStartTime] = useState(new Date(appointment?.start_at || Date.now()));
-  const [endTime, setEndTime] = useState(new Date(appointment?.end_at || new Date(Date.now() + (60 * 60 * 1000))));
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [showScheduledDatePicker, setShowScheduledDatePicker] = useState(false);
-  const [showStartTimePicker, setShowStartTimePicker] = useState(false);
-  const [showEndTimePicker, setShowEndTimePicker] = useState(false);
+  const nearestHalfHour = () => {
+    const min = moment().minute()
+    return moment()
+      .utc()
+      .add(min > 30 && 1, 'hours')
+      .minutes(min <= 30 ? 30 : 0)
+      .format()
+  }
+  const formatToUTC = (date) => moment(date).utc().format()
+  const formatToMDT = (date) => moment(date).format()
+
+  const [date, setDate] = useState(new Date(formatToUTC(appointment?.start_at)))
+  const [startTime, setStartTime] = useState(
+    new Date(appointment?.start_at || nearestHalfHour()),
+  )
+  const [endTime, setEndTime] = useState(
+    new Date(appointment?.end_at || moment(startTime).add(1, 'hour').format()),
+  )
+  const [scheduledUntil, setScheduledUntil] = useState(
+    new Date(formatToUTC(appointment?.scheduled_until)),
+  )
+  const [showDatePicker, setShowDatePicker] = useState(false)
+  const [showScheduledDatePicker, setShowScheduledDatePicker] = useState(false)
+  const [showStartTimePicker, setShowStartTimePicker] = useState(false)
+  const [showEndTimePicker, setShowEndTimePicker] = useState(false)
 
   const [formObject, setFormObject] = useState({
     id: appointment?.id,
-    clinician_id: appointment?.clinician_id,
-    start_at: moment(startTime).format('YYYY-MM-DDTHH:mm'),
-    end_at: moment(endTime).format('YYYY-MM-DDTHH:mm'),
-  });
+    clinician_id: appointment?.clinician_id || 277,
+    start_at: formatToMDT(startTime),
+    end_at: formatToMDT(endTime),
+    scheduled_until: formatToMDT(scheduledUntil),
+  })
 
-  const showPicker = type => {
-    if (type == 'date') setShowDatePicker(true);
-    else if(type == 'startTime') setShowStartTimePicker(true);
-    else if(type == 'scheduledUntil') setShowScheduledDatePicker(true);
-    else setShowEndTimePicker(true);
-  };
+  console.log('====================================')
+  console.log(formObject)
+  console.log('====================================')
+
+  const showPicker = (type) => {
+    if (type == 'date') setShowDatePicker(true)
+    else if (type == 'startTime') setShowStartTimePicker(true)
+    else if (type == 'scheduledUntil') setShowScheduledDatePicker(true)
+    else setShowEndTimePicker(true)
+  }
   const onDateChange = (value) => {
-    setShowDatePicker(false);
-    setDate(value);
-    handleDateTimeChange('date', value);
-  };
+    setShowDatePicker(false)
+    setDate(value)
+    handleDateTimeChange('date', value)
+  }
   const onScheduledUntilDateChange = (value) => {
-    setShowScheduledDatePicker(false);
-    setScheduledUntil(value);
+    setShowScheduledDatePicker(false)
+    setScheduledUntil(value)
     setFormObject({
       ...formObject,
       scheduled_until: moment(value).format('YYYY-MM-DDTHH:mm'),
     })
-  };
+  }
   const onStartTimeChange = (value) => {
-    setShowStartTimePicker(false);
-    setStartTime(value);
-    handleDateTimeChange('startTime', value);
-  };
+    setShowStartTimePicker(false)
+    setStartTime(value)
+    handleDateTimeChange('startTime', value)
+  }
   const onEndTimeChange = (value) => {
-    setShowEndTimePicker(false);
-    setEndTime(value);
-    handleDateTimeChange('endTime', value);
-  };
+    setShowEndTimePicker(false)
+    setEndTime(value)
+    handleDateTimeChange('endTime', value)
+  }
 
   const handleDateTimeChange = (type, value) => {
-    const newDate = moment(type == 'date' ? value : date).format('YYYY-MM-DD');
-    const newStartTime = moment(type == 'startTime' ? value : startTime).format('HH:mm');
-    const newEndTime = moment(type == 'endTime' ? value : endTime).format('HH:mm');
-    const changedStartTime = `${newDate}T${newStartTime}`;
-    const changedEndTime = `${newDate}T${newEndTime}`;
+    const newDate = moment(type == 'date' ? value : date).format('YYYY-MM-DD')
+    const newStartTime = moment(type == 'startTime' ? value : startTime).format(
+      'HH:mm',
+    )
+    const newEndTime = moment(type == 'endTime' ? value : endTime).format(
+      'HH:mm',
+    )
+    const changedStartTime = `${newDate}T${newStartTime}`
+    const changedEndTime = `${newDate}T${newEndTime}`
+
     setFormObject({
       ...formObject,
       start_at: changedStartTime,
-      end_at: changedEndTime
+      end_at: changedEndTime,
+      // scheduled_until: moment(changedEndTime).add(5, 'hours').format('YYYY-MM-DDTHH:mm'),
     })
   }
 
-  const updateAppointment = async () => {
-    const url = `${BASE_URL_APP}/appointments/${formObject.id}.json?`;
-    axios.patch(url, { appointment: formObject })
-      .then(response => response)
-      .catch(err => err)
-  };
+  const updateAppointment = () => {
+    const url = `${BASE_URL_APP}/appointments/${formObject.id}.json`
+    axios
+      .patch(url, { appointment: formObject })
+      .then((response) => response)
+      .catch((err) => err)
+  }
 
-  const createAppointment =  () => {
-    const url = `${BASE_URL_APP}/appointments`;
-    axios.post(url, { appointment: formObject })
-      .then(response => response)
-      .catch(err => err)
-  };
+  const createAppointment = () => {
+    const url = `${BASE_URL_APP}/appointments.json`
+    axios
+      .post(url, { appointment: formObject })
+      .then((response) => response)
+      .catch((err) => err)
+  }
 
   const handleSubmit = () => {
     if (formObject.id) {
-      updateAppointment();
+      updateAppointment()
     } else {
-      createAppointment();
+      createAppointment()
     }
-    navigation.navigate(route.params.previousScreen, { startAt: formObject.start_at });
-  }
-
-  const handleFrequencyChange = (value) => {
-    console.log('==================handleOnChange==================');
-    if (value !== 'One Time') {
-      console.log(value);
-    }
-    console.log('====================================');
+    navigation.navigate(route.params.previousScreen, {
+      startAt: formObject.start_at,
+    })
   }
 
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
-        style={{ width: "100%" }}
-        contentContainerStyle={{ alignItems: "center", justifyContent: "center" }}>
+        style={{ width: '100%' }}
+        contentContainerStyle={{
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
         {/* {isLoading && <Loader isLoading={isLoading}/>} */}
         {/* Header */}
         <Header
           containerStyle={{
-              height: 50,
-              paddingHorizontal: SIZES.padding,
-              alignItems: 'center'
+            height: 50,
+            paddingHorizontal: SIZES.padding,
+            alignItems: 'center',
           }}
           title={appointment ? 'Edit Appointment' : 'New Appointment'}
-          leftComponent={
-            <BackButton
-              navigation={navigation}
-              previousScreen={route.params.previousScreen}
-              params={{startAt: formObject.start_at}}
-            />
-          }
+          leftComponent={<BackButton navigation={navigation} />}
         />
-        
+
         {/* Clinician Dropdown */}
         <CustomDropdown
           open={clinicianDropDown}
@@ -200,7 +250,7 @@ const AppointmentForm = (props) => {
           value={codeModifier}
           setValue={setCodeModifier}
           items={codeModifierList}
-          formFieldID={'code_modifier_id'}
+          formFieldID={'procedure_code_modifier_id'}
           formObject={formObject}
           setFormObject={setFormObject}
           searchPlaceholder={'Search Code Modifier...'}
@@ -223,8 +273,8 @@ const AppointmentForm = (props) => {
           <TextInput
             style={styles.textInput}
             editable={false}
-            label={"Payer"}
-            mode={"outlined"}
+            label={'Payer'}
+            mode={'outlined'}
             value={payer}
           />
         </View>
@@ -269,53 +319,45 @@ const AppointmentForm = (props) => {
         />
 
         {/* Display the selected date */}
-        <View style={styles.inputView}>
-          <CustomDatepicker
-            label={'Date'}
-            mode={'date'}
-            placeholderText={'Select Date'}
-            iconName={'calendar-month-outline'}
-            value={date}
-            onPress={() => showPicker('date')}
-            show={showDatePicker}
-            // onChange={onDateChange}
-            onConfirm={onDateChange}
-            onCancel={() => setShowDatePicker(false)}
-          />
-        </View>
+        <CustomDatepicker
+          label={'Date'}
+          mode={'date'}
+          placeholderText={'Select Date'}
+          iconName={'calendar-month-outline'}
+          value={date}
+          onPress={() => showPicker('date')}
+          show={showDatePicker}
+          // onChange={onDateChange}
+          onConfirm={onDateChange}
+          onCancel={() => setShowDatePicker(false)}
+        />
 
         {/* Display the selected Time */}
-        <View style={[styles.inputView]}>
-          <CustomDatepicker
-            label={'Start Time'}
-            mode={'time'}
-            placeholderText={'Select Start Time'}
-            iconName={'clock-outline'}
-            value={startTime}
-            onPress={() => showPicker('startTime')}
-            show={showStartTimePicker}
-            // onChange={onStartTimeChange}
-            onConfirm={onStartTimeChange}
-            onCancel={() => setShowStartTimePicker(false)}
-          />
-
-        </View>
-
-        <View style={[styles.inputView]}>
-          {/* End Time */}
-          <CustomDatepicker
-            label={'End Time'}
-            mode={'time'}
-            placeholderText={'Select End Time'}
-            iconName={'clock-outline'}
-            value={endTime}
-            onPress={() => showPicker('endTime')}
-            show={showEndTimePicker}
-            // onChange={onEndTimeChange}
-            onConfirm={onEndTimeChange}
-            onCancel={() => setShowEndTimePicker(false)}
-          />
-        </View>
+        <CustomDatepicker
+          label={'Start Time'}
+          mode={'time'}
+          placeholderText={'Select Start Time'}
+          iconName={'clock-outline'}
+          value={startTime}
+          onPress={() => showPicker('startTime')}
+          show={showStartTimePicker}
+          // onChange={onStartTimeChange}
+          onConfirm={onStartTimeChange}
+          onCancel={() => setShowStartTimePicker(false)}
+        />
+        {/* End Time */}
+        <CustomDatepicker
+          label={'End Time'}
+          mode={'time'}
+          placeholderText={'Select End Time'}
+          iconName={'clock-outline'}
+          value={endTime}
+          onPress={() => showPicker('endTime')}
+          show={showEndTimePicker}
+          // onChange={onEndTimeChange}
+          onConfirm={onEndTimeChange}
+          onCancel={() => setShowEndTimePicker(false)}
+        />
 
         {/* Frequency Dropdown */}
         <CustomDropdown
@@ -323,7 +365,7 @@ const AppointmentForm = (props) => {
           setOpen={setFrequencyDropDown}
           label={'Frequency'}
           value={frequency}
-          onChange={handleFrequencyChange}
+          // onChange={handleFrequencyChange}
           setValue={setFrequency}
           items={frequencyList}
           formFieldID={'frequency'}
@@ -331,21 +373,19 @@ const AppointmentForm = (props) => {
           setFormObject={setFormObject}
           searchPlaceholder={'Search Frequency...'}
         />
-        {frequency !== 'One Time' &&
-          <View style={styles.inputView}>
-            <CustomDatepicker
-              label={'Scheduled Until'}
-              mode={'date'}
-              placeholderText={'Select Date'}
-              iconName={'calendar-month-outline'}
-              value={scheduledUntil}
-              onPress={() => showPicker('scheduledUntil')}
-              show={showScheduledDatePicker}
-              onConfirm={onScheduledUntilDateChange}
-              onCancel={() => setShowScheduledDatePicker(false)}
-            />
-          </View>
-        }
+        {frequency && frequency !== 'One Time' && (
+          <CustomDatepicker
+            label={'Scheduled Until'}
+            mode={'date'}
+            placeholderText={'Select Date'}
+            iconName={'calendar-month-outline'}
+            value={scheduledUntil}
+            onPress={() => showPicker('scheduledUntil')}
+            show={showScheduledDatePicker}
+            onConfirm={onScheduledUntilDateChange}
+            onCancel={() => setShowScheduledDatePicker(false)}
+          />
+        )}
 
         {/* Reminder */}
         <View style={styles.inputView}>
@@ -353,37 +393,37 @@ const AppointmentForm = (props) => {
             style={styles.textInput}
             multiline={true}
             numberOfLines={5}
-            label={"Reminder"}
+            label={'Reminder'}
             placeholder={'Reminder ok'}
-            mode={"outlined"}
+            mode={'outlined'}
             value={reminder}
-            onChangeText={text => setReminder(text)}
+            onChangeText={(text) => setReminder(text)}
           />
         </View>
 
         {/* Submit Changes */}
         <TouchableOpacity
           onPress={() => handleSubmit()}
-          style={{ ...styles.loginBtn, marginTop: 0 }}>
+          style={{ ...styles.loginBtn, marginTop: 0 }}
+        >
           {isLoading && <ActivityIndicator size="large" color="yellow" />}
-          <AntDesign name="save" size={22} color="white"/>
+          <AntDesign name="save" size={22} color="white" />
           <Text style={styles.loginText}>Save</Text>
         </TouchableOpacity>
-        
       </ScrollView>
     </SafeAreaView>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
   dropdownContainer: {
     backgroundColor: COLORS.secondary,
     borderWidth: 0.6,
-    borderRadius: 3
+    borderRadius: 3,
   },
   dropdownLabel: {
     fontSize: 12,
-    fontWeight: "100",
+    fontWeight: '100',
     color: COLORS.gray,
     backgroundColor: COLORS.secondary,
     top: 7,
@@ -391,7 +431,7 @@ const styles = StyleSheet.create({
     zIndex: 9999999,
     alignSelf: 'flex-start',
     borderRadius: 7,
-    paddingHorizontal: 3
+    paddingHorizontal: 3,
   },
   container: {
     paddingTop: Platform.OS === 'ios' ? 0 : 50,
@@ -402,48 +442,47 @@ const styles = StyleSheet.create({
   },
 
   logo: {
-      marginTop: 20,
-      marginBottom: 10,
-      height: 75,
-      width: 200
+    marginTop: 20,
+    marginBottom: 10,
+    height: 75,
+    width: 200,
   },
 
   inputView: {
-      flex: 1,
-    width: "85%",
-        marginBottom: 20,
-        margin: 2,
-        paddingLeft: 5,
-        // flexDirection: "row",
-        justifyContent: "flex-start",
+    flex: 1,
+    width: '85%',
+    marginBottom: 20,
+    margin: 2,
+    paddingLeft: 5,
+    justifyContent: 'flex-start',
   },
 
   textBoxIcon: {
-      paddingTop: 16,
-      paddingRight: 10,
+    paddingTop: 16,
+    paddingRight: 10,
   },
 
   loginBtn: {
-        width: "90%",
-        borderRadius: 10,
-        height: 40,
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
-        marginVertical: 20,
-        backgroundColor: COLORS.blue,
-        shadowColor: 'rgba(0, 0, 0, 0.1)',
-        shadowOpacity: 0.8,
-        elevation: 6,
-        shadowRadius: 15,
-        shadowOffset: {width: 1, height: 13},
+    width: '90%',
+    borderRadius: 10,
+    height: 40,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 20,
+    backgroundColor: COLORS.blue,
+    shadowColor: 'rgba(0, 0, 0, 0.1)',
+    shadowOpacity: 0.8,
+    elevation: 6,
+    shadowRadius: 15,
+    shadowOffset: { width: 1, height: 13 },
   },
-    
+
   loginText: {
-      color: 'white',
-      marginLeft: 5,
-    fontWeight: "bold",
-      fontSize: 16
+    color: 'white',
+    marginLeft: 5,
+    fontWeight: 'bold',
+    fontSize: 16,
   },
   untilText: {
     marginHorizontal: 5,
@@ -453,7 +492,7 @@ const styles = StyleSheet.create({
   textInput: {
     flex: 1,
     backgroundColor: COLORS.secondary,
-  }
-});
+  },
+})
 
-export default AppointmentForm;
+export default AppointmentForm
