@@ -7,7 +7,7 @@ const BackButton = ({ navigation }) => {
       style={{
         alignItems: 'flex-start',
       }}
-      onPress={() => navigation.navigate.goBack()}
+      onPress={() => navigation.navigate('MainLayout')}
     >
       <MaterialCommunityIcons
         name="keyboard-backspace"

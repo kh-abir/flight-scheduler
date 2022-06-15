@@ -1,27 +1,21 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import {
   Platform,
-  View,
   Text,
   StyleSheet,
   TouchableOpacity,
   SafeAreaView,
-  ActivityIndicator,
 } from 'react-native'
-import _ from 'underscore'
 import { ScrollView } from 'react-native-gesture-handler'
 import { AntDesign } from '@expo/vector-icons'
 import { COLORS, SIZES } from '../constants/theme'
 import Header from '../components/Header'
 import moment from 'moment'
 import BackButton from '../components/BackButton'
-import { RadioButton, TextInputMask, TextInput } from 'react-native-paper'
 import CustomDropdown from '../components/CustomDropdown'
 import CustomDatepicker from '../components/CustomDatepicker'
 import axios from 'axios'
 import { BASE_URL_APP } from '@env'
-import { useNavigationState } from '@react-navigation/native'
-import Loader from '../components/Loader'
 import CustomTextInput from '../components/CustomTextInput'
 import {
   GENDER,
@@ -40,9 +34,6 @@ const ClientForm = (props) => {
     id: patient?.id,
     clinician_id: 277,
   })
-  console.log('====================================')
-  console.log(patient.homephonemessage)
-  console.log('====================================')
 
   const getFormFieldValue = (property) =>
     formObject[property] || patient?.[property] || null
