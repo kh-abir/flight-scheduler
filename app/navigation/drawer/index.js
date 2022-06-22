@@ -66,7 +66,10 @@ const CustomDrawer = () => {
             <HomeScreen {...props} drawerAnimationStyle={animatedStyle} />
           )}
         </Drawer.Screen>
-        <Drawer.Screen name="NewAppointmentScreen">
+        <Drawer.Screen
+          name="NewAppointmentScreen"
+          options={{ unmountOnBlur: true }}
+        >
           {(props) => (
             <NewAppointmentScreen
               {...props}
