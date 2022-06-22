@@ -36,7 +36,7 @@ const ClientForm = (props) => {
   })
 
   const getFormFieldValue = (property) =>
-    formObject[property] || patient?.[property] || null
+    formObject[property] ?? patient?.[property] ?? null
 
   const [showGenderDropDown, setShowGenderDropDown] = useState(false)
   const genderList = GENDER.map((item) => {
@@ -103,7 +103,7 @@ const ClientForm = (props) => {
     } else {
       createPatient()
     }
-    navigation.navigate('MainLayout')
+    navigation.navigate('ClientsScreen')
   }
 
   return (
@@ -270,6 +270,15 @@ const ClientForm = (props) => {
           formObject={formObject}
           setFormObject={setFormObject}
           searchPlaceholder={'Search Preferred Phone...'}
+        />
+        <CustomTextInput
+          label={'Actionable Mobilephone'}
+          placeholder={'Enter Actionable Mobilephone'}
+          value={getFormFieldValue('actionable_mobilephone')}
+          keyboardType={'phone-pad'}
+          onChangeText={(text) =>
+            handleInputTextChange('actionable_mobilephone', text)
+          }
         />
         {/* Submit Changes */}
         <TouchableOpacity
