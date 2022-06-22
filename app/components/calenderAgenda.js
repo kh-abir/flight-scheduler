@@ -1,66 +1,68 @@
-import React, { useState, useEffect } from 'react';
-import { View, TouchableOpacity } from 'react-native';
-import { Agenda } from 'react-native-calendars';
-import { COLORS } from '../constants/theme';
-import moment from 'moment';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import axios from 'axios';
-import _ from 'underscore';
-import { useIsFocused } from '@react-navigation/native';
-import { BASE_URL_APP, BASE_URL_V2 } from '@env';
-import RenderAppointmentItem from './RenderAppointmentItem';
-import Loader from './Loader';
+import React, { useState, useEffect } from 'react'
+import { View, TouchableOpacity } from 'react-native'
+import { Agenda } from 'react-native-calendars'
+import { COLORS } from '../constants/theme'
+import moment from 'moment'
+import { MaterialCommunityIcons } from '@expo/vector-icons'
+import axios from 'axios'
+import _ from 'underscore'
+import { useIsFocused } from '@react-navigation/native'
+import { BASE_URL_APP, BASE_URL_V2 } from '@env'
+import RenderAppointmentItem from './RenderAppointmentItem'
+import Loader from './Loader'
 
 const CalendarAgenda = (props) => {
-  const { navigation, route } = props;
-  const [loading, setLoading] = useState(false);
-  const selectedDate = moment(route.params?.startAt).format('YYYY-MM-DD');
-  const [items, setItems] = useState({});
-  const isFocused = useIsFocused();
+  const { navigation, route } = props
+  const [loading, setLoading] = useState(false)
+  const selectedDate = moment(route.params?.startAt).format('YYYY-MM-DD')
+  const [items, setItems] = useState({})
+  const isFocused = useIsFocused()
 
-  useEffect(() => {
-    fetchAppointments(moment().format('YYYY-MM-DD'), 'agendaWeek');
-  }, []);
+  // useEffect(() => {
+  //   fetchAppointments(moment().format('YYYY-MM-DD'), 'agendaWeek')
+  // }, [])
 
   const fetchAppointments = (date, period) => {
-    generateEmptyDate(date);
+    generateEmptyDate(date)
     if (items[date].length === 0) {
-      setLoading(true);
-      const url = `${BASE_URL_V2}/appointments.json?date=${date}&calendar_view=${period}`;
+      setLoading(true)
+      const url = `${BASE_URL_APP}/appointments.json?date=${date}`
       axios
         .get(url)
         .then((response) => {
-          appendAppointments(response.data['appointments']);
-          setLoading(false);
+          appendAppointments(response.data['appointments'])
+          setLoading(false)
         })
-        .catch((err) => err);
+        .catch((err) => err)
     }
-  };
+  }
 
   const appendAppointments = (appointments) => {
     appointments.map((appointment) => {
-      const appointmentDate = moment(appointment.start_at).format('YYYY-MM-DD');
-      if (items[appointmentDate] === undefined) items[appointmentDate] = [];
+      const appointmentDate = moment(appointment.start_at_time).format(
+        'YYYY-MM-DD',
+      )
+      if (items[appointmentDate] === undefined) items[appointmentDate] = []
       if (
         _.find(items[appointmentDate], { id: appointment.id }) === undefined
       ) {
-        items[appointmentDate].push(appointment);
+        items[appointmentDate].push(appointment)
       }
-    });
+    })
 
-    const newItems = {};
+    const newItems = {}
     Object.keys(items).forEach((key) => {
-      newItems[key] = items[key];
-    });
-    setItems(newItems);
-  };
+      newItems[key] = items[key]
+    })
+    setItems(newItems)
+  }
 
   const generateEmptyDate = (date) => {
     for (let i = -15; i <= 15; i++) {
-      const key = moment(date).add(i, 'days').format('YYYY-MM-DD');
-      if (items[key] === undefined) items[key] = [];
+      const key = moment(date).add(i, 'days').format('YYYY-MM-DD')
+      if (items[key] === undefined) items[key] = []
     }
-  };
+  }
 
   const renderEmptyDate = () => {
     return (
@@ -78,15 +80,15 @@ const CalendarAgenda = (props) => {
           }}
         />
       </TouchableOpacity>
-    );
-  };
+    )
+  }
 
   const editAppointmentForm = async (mode, appointmentId = null) => {
-    let url = null;
+    let url = null
     if (mode === 'new') {
-      url = `${BASE_URL_APP}/appointments/new.json`;
+      url = `${BASE_URL_APP}/appointments/new.json`
     } else {
-      url = `${BASE_URL_APP}/appointments/${appointmentId}.json`;
+      url = `${BASE_URL_APP}/appointments/${appointmentId}.json`
     }
     axios
       .get(url)
@@ -94,10 +96,10 @@ const CalendarAgenda = (props) => {
         navigation.navigate('AppointmentForm', {
           item: response.data,
           previousScreen: route.name,
-        });
+        })
       })
-      .catch((err) => err);
-  };
+      .catch((err) => err)
+  }
 
   const renderItem = (item) => {
     return (
@@ -105,22 +107,22 @@ const CalendarAgenda = (props) => {
         item={item}
         onPress={() => editAppointmentForm('edit', item.id)}
       />
-    );
-  };
+    )
+  }
 
   const renderKnob = () => {
     return (
       <View>
         <MaterialCommunityIcons name="chevron-down" size={30} color="black" />
       </View>
-    );
-  };
+    )
+  }
 
   return (
     <Agenda
       // selected={selectedDate}
       items={items}
-      // loadItemsForMonth={items}
+      loadItemsForMonth={(day) => fetchAppointments(day.dateString, 'tableDay')}
       renderItem={renderItem}
       renderEmptyDate={renderEmptyDate}
       onCalendarToggled={(calendarOpened) => setLoading(calendarOpened)}
@@ -138,7 +140,7 @@ const CalendarAgenda = (props) => {
         agendaDayNumColor: 'green',
       }}
     />
-  );
-};
+  )
+}
 
-export default CalendarAgenda;
+export default CalendarAgenda

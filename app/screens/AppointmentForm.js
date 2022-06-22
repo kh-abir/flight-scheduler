@@ -203,9 +203,7 @@ const AppointmentForm = (props) => {
     } else {
       createAppointment()
     }
-    navigation.navigate(route.params.previousScreen, {
-      startAt: formObject.start_at,
-    })
+    navigation.navigate('MainLayout')
   }
 
   return (
