@@ -10,6 +10,9 @@ const CustomTextInput = (props) => {
       <TextInput
         mode={'outlined'}
         style={styles.textField}
+        activeOutlineColor={COLORS.blue}
+        outlineColor={COLORS.blue1}
+        placeholderTextColor={COLORS.blue1}
         label={label}
         placeholder={placeholder}
         keyboardType={keyboardType}

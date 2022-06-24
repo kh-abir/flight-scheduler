@@ -8,7 +8,7 @@ import React from 'react'
 import LoginScreen from './app/screens/LoginScreen'
 import { store } from './app/stores'
 import { Provider as PaperProvider } from 'react-native-paper'
-import { ToastProvider } from 'react-native-toast-notifications'
+import CustomToastProvider from './app/components/CustomToastProvider'
 
 const Stack = createStackNavigator()
 const App = () => {
@@ -16,7 +16,7 @@ const App = () => {
     <Provider store={store}>
       <SafeAreaProvider>
         <PaperProvider>
-          <ToastProvider>
+          <CustomToastProvider>
             <NavigationContainer>
               <Stack.Navigator
                 initialRoutename={'Home'}
@@ -28,7 +28,7 @@ const App = () => {
                 <Stack.Screen name={'LoginScreen'} component={LoginScreen} />
               </Stack.Navigator>
             </NavigationContainer>
-          </ToastProvider>
+          </CustomToastProvider>
         </PaperProvider>
       </SafeAreaProvider>
     </Provider>

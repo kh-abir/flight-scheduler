@@ -35,23 +35,12 @@ const LoginScreen = (props) => {
   const [isLoading, setIsLoading] = useState(true)
   const isDarkMode = useColorScheme() == 'dark'
   const toast = useToast()
-  const showToast = (message, type) => {
-    toast.show(message, {
-      type: type,
-      placement: 'bottom',
-      duration: 2000,
-      swipeEnabled: true,
-      animationType: 'slide-in',
-      animationDuration: 100,
-    })
-  }
-
   const saveAuthData = async (key, value) => {
     try {
       setAuthenticated(true)
       await AsyncStorage.setItem(key, JSON.stringify(value))
     } catch (e) {
-      showToast('Something went wrong', 'danger')
+      toast.show('Something went wrong', { type: 'custom_danger' })
     }
   }
 
@@ -71,12 +60,16 @@ const LoginScreen = (props) => {
       .post(url, {}, { params })
       .then((response) => {
         saveAuthData('currentUser', response['data'])
-        showToast(`Welcome ${response['data']['email']}`, 'success')
+        toast.show(`Welcome ${response['data']['email']}`, {
+          type: 'custom_success',
+        })
         setIsLoading(false)
         navigation.navigate('MainLayout')
       })
       .catch((err) => {
-        showToast('Invalid credentials. Please try again', 'danger')
+        toast.show('Invalid credentials. Please try again', {
+          type: 'custom_danger',
+        })
         setIsLoading(false)
       })
   }
@@ -219,10 +212,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: 10,
     backgroundColor: COLORS.blue2,
-    shadowColor: 'rgba(0, 0, 0, 0.1)',
-    shadowOpacity: 0.7,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 5 },
+    shadowColor: '#000',
+    shadowOffset: {
+      width: -2,
+      height: 2,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 5,
   },
   loginText: {
     marginLeft: 5,

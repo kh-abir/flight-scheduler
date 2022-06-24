@@ -24,16 +24,6 @@ const CustomDrawerContent = (props) => {
   } = props
 
   const toast = useToast()
-  const showToast = (message, type) => {
-    toast.show(message, {
-      type: type,
-      placement: 'bottom',
-      duration: 2000,
-      swipeEnabled: true,
-      animationType: 'slide-in',
-      animationDuration: 100,
-    })
-  }
   const readAuthData = async () => {
     let value = null
     try {
@@ -58,7 +48,7 @@ const CustomDrawerContent = (props) => {
       await AsyncStorage.removeItem('currentUser')
       axios.defaults.headers.common['Authorization'] = null
       setAuthenticated(false)
-      showToast('Succesfully logged out', 'success')
+      toast.show('Succesfully logged out', { type: 'custom_success' })
       navigation.navigate('LoginScreen')
     } catch (e) {}
   }
