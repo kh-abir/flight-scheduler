@@ -17,14 +17,15 @@ import moment from 'moment'
 import { BASE_URL_APP } from '@env'
 import axios from 'axios'
 import Loader from '../components/Loader'
+import { connect } from 'react-redux'
 
 const ClientsScreen = (props) => {
-  const { navigation, route, drawerAnimationStyle } = props
+  const { navigation, route, drawerAnimationStyle, currentUser } = props
   const [patients, setPatients] = useState([])
   const [items, setItems] = useState(patients)
   const [loading, setLoading] = useState(true)
   useEffect(() => {
-    const url = `${BASE_URL_APP}/patients.json`
+    const url = `/patients.json`
     axios
       .get(url)
       .then((response) => {
@@ -52,9 +53,9 @@ const ClientsScreen = (props) => {
   const patientForm = (mode, patientID = null) => {
     let url = null
     if (mode === 'new') {
-      url = `${BASE_URL_APP}/patients/new.json`
+      url = `/patients/new.json`
     } else {
-      url = `${BASE_URL_APP}/patients/${patientID}.json`
+      url = `/patients/${patientID}.json`
     }
     axios
       .get(url)
@@ -120,6 +121,12 @@ const ClientsScreen = (props) => {
     </Animated.View>
   )
 }
+const mapStateToProps = (state) => {
+  return {
+    isAuthenticated: state.authReducer.isAuthenticated,
+    currentUser: state.authReducer.currentUser,
+  }
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -144,4 +151,4 @@ const styles = StyleSheet.create({
   },
 })
 
-export default ClientsScreen
+export default connect(mapStateToProps)(ClientsScreen)

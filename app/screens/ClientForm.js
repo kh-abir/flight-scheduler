@@ -24,15 +24,20 @@ import {
   PREFERRED_PHONE,
 } from '../constants/gender'
 import { STATES } from '../constants/index'
+import Loader from '../components/Loader'
+import { useToast } from 'react-native-toast-notifications'
+import { connect } from 'react-redux'
 
 const ClientForm = (props) => {
-  const { route, navigation } = props
+  const toast = useToast()
+  const [isLoading, setIsLoading] = useState(false)
+  const { route, navigation, currentUser } = props
   const response = route.params.item
   const { patient, carriers } = response ?? {}
 
   const [formObject, setFormObject] = useState({
     id: patient?.id,
-    clinician_id: 277,
+    clinician_id: currentUser?.clinician_id,
   })
 
   const getFormFieldValue = (property) =>
@@ -82,19 +87,39 @@ const ClientForm = (props) => {
   }
 
   const updatePatient = () => {
-    const url = `${BASE_URL_APP}/patients/${formObject.id}.json`
+    setIsLoading(true)
+    const url = `/patients/${formObject.id}.json`
     axios
       .patch(url, { patient: formObject })
-      .then((response) => response)
-      .catch((err) => err)
+      .then((response) => {
+        toast.show('Patient Updated Succesfully', {
+          type: 'custom_success',
+        })
+        setIsLoading(false)
+        navigation.navigate('ClientsScreen')
+      })
+      .catch((err) => {
+        setIsLoading(false)
+        toast.show('Something went wrong', { type: 'custom_danger' })
+      })
   }
 
   const createPatient = () => {
-    const url = `${BASE_URL_APP}/patients.json`
+    setIsLoading(true)
+    const url = `/patients.json`
     axios
       .post(url, { patient: formObject })
-      .then((response) => response)
-      .catch((err) => err)
+      .then((response) => {
+        toast.show('Patient Created Succesfully', {
+          type: 'custom_success',
+        })
+        setIsLoading(false)
+        navigation.navigate('ClientsScreen')
+      })
+      .catch((err) => {
+        setIsLoading(false)
+        toast.show('Something went wrong', { type: 'custom_danger' })
+      })
   }
 
   const handleSubmit = () => {
@@ -103,7 +128,6 @@ const ClientForm = (props) => {
     } else {
       createPatient()
     }
-    navigation.navigate('ClientsScreen')
   }
 
   return (
@@ -115,6 +139,7 @@ const ClientForm = (props) => {
           justifyContent: 'center',
         }}
       >
+        <Loader isLoading={isLoading} />
         {/* Header */}
         <Header
           containerStyle={{
@@ -292,7 +317,12 @@ const ClientForm = (props) => {
     </SafeAreaView>
   )
 }
-
+const mapStateToProps = (state) => {
+  return {
+    isAuthenticated: state.authReducer.isAuthenticated,
+    currentUser: state.authReducer.currentUser,
+  }
+}
 const styles = StyleSheet.create({
   container: {
     paddingTop: Platform.OS === 'ios' ? 0 : 50,
@@ -330,4 +360,4 @@ const styles = StyleSheet.create({
   },
 })
 
-export default ClientForm
+export default connect(mapStateToProps)(ClientForm)

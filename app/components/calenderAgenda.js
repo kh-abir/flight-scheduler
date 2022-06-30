@@ -6,34 +6,34 @@ import moment from 'moment'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import axios from 'axios'
 import _ from 'underscore'
-import { useIsFocused } from '@react-navigation/native'
-import { BASE_URL_APP, BASE_URL_V2 } from '@env'
+import { BASE_URL_APP } from '@env'
 import RenderAppointmentItem from './RenderAppointmentItem'
-import Loader from './Loader'
+import { connect } from 'react-redux'
 
 const CalendarAgenda = (props) => {
-  const { navigation, route } = props
+  const { navigation, route, currentUser } = props
   const [loading, setLoading] = useState(false)
   const selectedDate = moment(route.params?.startAt).format('YYYY-MM-DD')
   const [items, setItems] = useState({})
-  const isFocused = useIsFocused()
-
-  // useEffect(() => {
-  //   fetchAppointments(moment().format('YYYY-MM-DD'), 'agendaWeek')
-  // }, [])
 
   const fetchAppointments = (date, period) => {
     generateEmptyDate(date)
     if (items[date].length === 0) {
       setLoading(true)
-      const url = `${BASE_URL_APP}/appointments.json?date=${date}`
+      const params = {
+        date: date,
+      }
       axios
-        .get(url)
+        .get('/appointments.json', { params })
         .then((response) => {
           appendAppointments(response.data['appointments'])
           setLoading(false)
         })
-        .catch((err) => err)
+        .catch((err) => {
+          console.log('===================fetch appointments=================')
+          console.log(err)
+          setLoading(false)
+        })
     }
   }
 
@@ -83,12 +83,12 @@ const CalendarAgenda = (props) => {
     )
   }
 
-  const editAppointmentForm = async (mode, appointmentId = null) => {
+  const editAppointmentForm = (mode, appointmentId = null) => {
     let url = null
     if (mode === 'new') {
-      url = `${BASE_URL_APP}/appointments/new.json`
+      url = `/appointments/new.json`
     } else {
-      url = `${BASE_URL_APP}/appointments/${appointmentId}.json`
+      url = `/appointments/${appointmentId}.json`
     }
     axios
       .get(url)
@@ -98,7 +98,12 @@ const CalendarAgenda = (props) => {
           previousScreen: route.name,
         })
       })
-      .catch((err) => err)
+      .catch((err) => {
+        console.log(
+          '==================editAppointmentForm err==================',
+        )
+        console.log(err)
+      })
   }
 
   const renderItem = (item) => {
@@ -126,7 +131,7 @@ const CalendarAgenda = (props) => {
       renderItem={renderItem}
       renderEmptyDate={renderEmptyDate}
       onCalendarToggled={(calendarOpened) => setLoading(calendarOpened)}
-      onDayPress={(day) => fetchAppointments(day.dateString, 'tableDay')}
+      onDayPress={(day) => fetchAppointments(day.dateString, 'agendaWeek')}
       onDayChange={(day) => fetchAppointments(day.dateString, 'agendaWeek')}
       onRefresh={() => console.log('refreshing...')}
       refreshing={loading}
@@ -143,4 +148,11 @@ const CalendarAgenda = (props) => {
   )
 }
 
-export default CalendarAgenda
+const mapStateToProps = (state) => {
+  return {
+    isAuthenticated: state.authReducer.isAuthenticated,
+    // currentUser: state.authReducer.currentUser,
+  }
+}
+
+export default connect(mapStateToProps)(CalendarAgenda)

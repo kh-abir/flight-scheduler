@@ -9,6 +9,9 @@ import LoginScreen from './app/screens/LoginScreen'
 import { store } from './app/stores'
 import { Provider as PaperProvider } from 'react-native-paper'
 import CustomToastProvider from './app/components/CustomToastProvider'
+import axios from 'axios'
+import { BASE_URL_APP } from '@env'
+axios.defaults.baseURL = BASE_URL_APP
 
 const Stack = createStackNavigator()
 const App = () => {

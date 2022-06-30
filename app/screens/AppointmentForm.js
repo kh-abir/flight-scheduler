@@ -22,9 +22,11 @@ import axios from 'axios'
 import { BASE_URL_APP } from '@env'
 import { useNavigationState } from '@react-navigation/native'
 import Loader from '../components/Loader'
-
+import { useToast } from 'react-native-toast-notifications'
+import { connect } from 'react-redux'
 const AppointmentForm = (props) => {
-  const { route, navigation } = props
+  const toast = useToast()
+  const { route, navigation, currentUser } = props
   const response = route.params.item
   const {
     appointment,
@@ -39,6 +41,7 @@ const AppointmentForm = (props) => {
 
   const [isLoading, setIsLoading] = useState(false)
   const selectedItem = (list, val) => _.find(list, { id: val })
+  const uniqList = (list) => _.uniq(list, 'label')
   // Dropdown List
   const buildDropdownList = (items, key) => {
     return items.map((item) => {
@@ -52,7 +55,11 @@ const AppointmentForm = (props) => {
     'name',
   )
   const clientsList = buildDropdownList(patients, 'name')
-  const serviceCodesList = buildDropdownList(service_codes, 'description')
+
+  const serviceCodesList = uniqList(
+    buildDropdownList(service_codes, 'description'),
+  )
+
   const unitsList = []
   for (let i = 1; i <= 32; i++) unitsList.push({ id: i, label: i, value: i })
   const locationsList = buildDropdownList(locations, 'name')
@@ -122,15 +129,11 @@ const AppointmentForm = (props) => {
 
   const [formObject, setFormObject] = useState({
     id: appointment?.id,
-    clinician_id: appointment?.clinician_id || 277,
+    clinician_id: appointment?.clinician_id || currentUser?.clinician_id,
     start_at: formatToMDT(startTime),
     end_at: formatToMDT(endTime),
     scheduled_until: formatToMDT(scheduledUntil),
   })
-
-  console.log('====================================')
-  console.log(formObject)
-  console.log('====================================')
 
   const showPicker = (type) => {
     if (type == 'date') setShowDatePicker(true)
@@ -177,24 +180,43 @@ const AppointmentForm = (props) => {
       ...formObject,
       start_at: changedStartTime,
       end_at: changedEndTime,
-      // scheduled_until: moment(changedEndTime).add(5, 'hours').format('YYYY-MM-DDTHH:mm'),
     })
   }
 
   const updateAppointment = () => {
-    const url = `${BASE_URL_APP}/appointments/${formObject.id}.json`
+    setIsLoading(true)
+    const url = `/appointments/${formObject.id}.json`
     axios
       .patch(url, { appointment: formObject })
-      .then((response) => response)
-      .catch((err) => err)
+      .then((response) => {
+        toast.show('Appointment Updated Succesfully', {
+          type: 'custom_success',
+        })
+        setIsLoading(false)
+        navigation.navigate('MainLayout')
+      })
+      .catch((err) => {
+        setIsLoading(false)
+        toast.show('Something went wrong', { type: 'custom_danger' })
+      })
   }
 
   const createAppointment = () => {
-    const url = `${BASE_URL_APP}/appointments.json`
+    setIsLoading(true)
+    const url = `/appointments.json`
     axios
       .post(url, { appointment: formObject })
-      .then((response) => response)
-      .catch((err) => err)
+      .then((response) => {
+        toast.show('Appointment Created Succesfully', {
+          type: 'custom_success',
+        })
+        setIsLoading(false)
+        navigation.navigate('MainLayout')
+      })
+      .catch((err) => {
+        setIsLoading(false)
+        toast.show('Something went wrong', { type: 'custom_danger' })
+      })
   }
 
   const handleSubmit = () => {
@@ -203,7 +225,6 @@ const AppointmentForm = (props) => {
     } else {
       createAppointment()
     }
-    navigation.navigate('MainLayout')
   }
 
   return (
@@ -215,7 +236,7 @@ const AppointmentForm = (props) => {
           justifyContent: 'center',
         }}
       >
-        {/* {isLoading && <Loader isLoading={isLoading}/>} */}
+        <Loader isLoading={isLoading} />
         {/* Header */}
         <Header
           containerStyle={{
@@ -227,7 +248,7 @@ const AppointmentForm = (props) => {
           leftComponent={<BackButton navigation={navigation} />}
         />
 
-        {/* Clinician Dropdown */}
+        {/* Clinician Dropdown
         <CustomDropdown
           open={clinicianDropDown}
           setOpen={setClinicianDropDown}
@@ -239,7 +260,7 @@ const AppointmentForm = (props) => {
           formObject={formObject}
           setFormObject={setFormObject}
           searchPlaceholder={'Search Clinician...'}
-        />
+        /> */}
         {/* Code Modifier Dropdown */}
         <CustomDropdown
           open={codeModifierDropDown}
@@ -404,13 +425,18 @@ const AppointmentForm = (props) => {
           onPress={() => handleSubmit()}
           style={{ ...styles.loginBtn, marginTop: 0 }}
         >
-          {isLoading && <ActivityIndicator size="large" color="yellow" />}
           <AntDesign name="save" size={22} color="white" />
           <Text style={styles.loginText}>Save</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   )
+}
+const mapStateToProps = (state) => {
+  return {
+    isAuthenticated: state.authReducer.isAuthenticated,
+    currentUser: state.authReducer.currentUser,
+  }
 }
 
 const styles = StyleSheet.create({
@@ -493,4 +519,4 @@ const styles = StyleSheet.create({
   },
 })
 
-export default AppointmentForm
+export default connect(mapStateToProps)(AppointmentForm)

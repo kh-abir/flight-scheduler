@@ -20,7 +20,7 @@ import { useToast } from 'react-native-toast-notifications'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import TherapymateLogo from '../components/TherapymateLogo'
 import { connect } from 'react-redux'
-import { authenticate } from '../stores/auth/authActions'
+import { authenticate, setCurrentUser } from '../stores/auth/authActions'
 
 const LoginScreen = (props) => {
   const {
@@ -28,6 +28,8 @@ const LoginScreen = (props) => {
     drawerAnimationStyle,
     isAuthenticated,
     setAuthenticated,
+    setCurrentUser,
+    currentUser,
   } = props
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -37,8 +39,10 @@ const LoginScreen = (props) => {
   const toast = useToast()
   const saveAuthData = async (key, value) => {
     try {
-      setAuthenticated(true)
       await AsyncStorage.setItem(key, JSON.stringify(value))
+      setAuthenticated(true)
+      setCurrentUser(value)
+      axios.defaults.params = { email: value.email, token: value.token }
     } catch (e) {
       toast.show('Something went wrong', { type: 'custom_danger' })
     }
@@ -49,22 +53,23 @@ const LoginScreen = (props) => {
     isAuthenticated ? navigation.navigate('MainLayout') : null
   }, [isAuthenticated])
 
-  const [isEnabled, setIsEnabled] = useState(true)
+  const [isEnabled, setIsEnabled] = useState(false)
   const toggleSwitch = () => setIsEnabled((previousState) => !previousState)
 
   const login = () => {
     setIsLoading(true)
-    const url = `${BASE_URL_APP}/sessions.json`
     const params = { username: email, password: password }
     axios
-      .post(url, {}, { params })
+      .post('/sessions.json', {}, { params })
       .then((response) => {
-        saveAuthData('currentUser', response['data'])
-        toast.show(`Welcome ${response['data']['email']}`, {
+        saveAuthData('currentUser', response['data']).then((res) => {
+          setIsLoading(false)
+          navigation.navigate('MainLayout')
+        })
+        const msg = `Welcome ${response['data']['email']}`
+        toast.show(msg, {
           type: 'custom_success',
         })
-        setIsLoading(false)
-        navigation.navigate('MainLayout')
       })
       .catch((err) => {
         toast.show('Invalid credentials. Please try again', {
@@ -97,14 +102,16 @@ const LoginScreen = (props) => {
           <TherapymateLogo />
           <View style={styles.inputView}>
             <TextInput
-              mode="outlined"
+              mode="flat"
               label="Email"
+              caretHidden={false}
               keyboardType="email-address"
               style={styles.TextInput}
-              activeOutlineColor={COLORS.blue}
-              outlineColor={COLORS.blue1}
+              activeUnderlineColor={COLORS.blue}
+              underlineColor={COLORS.blue1}
               placeholder="Enter Your Email"
               placeholderTextColor={COLORS.blue1}
+              value={email}
               onChangeText={setEmail}
               right={
                 <TextInput.Icon
@@ -119,13 +126,14 @@ const LoginScreen = (props) => {
 
           <View style={styles.inputView}>
             <TextInput
-              mode="outlined"
+              mode="flat"
               label="Password"
               style={styles.TextInput}
-              activeOutlineColor={COLORS.blue}
-              outlineColor={COLORS.blue1}
+              activeUnderlineColor={COLORS.blue}
+              underlineColor={COLORS.blue1}
               placeholder="Enter Your Password"
               placeholderTextColor={COLORS.blue1}
+              value={password}
               onChangeText={setPassword}
               secureTextEntry
               right={
@@ -184,8 +192,7 @@ const styles = StyleSheet.create({
   },
 
   TextInput: {
-    height: 50,
-    flex: 1,
+    height: 56,
     backgroundColor: COLORS.secondary,
   },
 
@@ -276,11 +283,13 @@ const mapStateToProps = (state) => {
   return {
     selectedTab: state.tabReducer.selectedTab,
     isAuthenticated: state.authReducer.isAuthenticated,
+    currentUser: state.authReducer.currentUser,
   }
 }
 
 const mapDispatchToProps = (dispatch) => ({
   setAuthenticated: (val) => dispatch(authenticate(val)),
+  setCurrentUser: (val) => dispatch(setCurrentUser(val)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(LoginScreen)

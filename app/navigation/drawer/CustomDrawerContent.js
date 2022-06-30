@@ -8,11 +8,12 @@ import { name, version } from '../../../package.json'
 import { DRAWER_ITEMS } from '../../constants/drawerItems'
 import CloseMenu from '../../components/CloseMenu'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { authenticate } from '../../stores/auth/authActions'
+import { authenticate, setCurrentUser } from '../../stores/auth/authActions'
 import { setSelectedTab } from '../../stores/tab/tabActions'
 import axios from 'axios'
 import TherapymateLogo from '../../components/TherapymateLogo'
 import { useToast } from 'react-native-toast-notifications'
+import { BASE_URL_APP } from '@env'
 
 const CustomDrawerContent = (props) => {
   const {
@@ -21,6 +22,7 @@ const CustomDrawerContent = (props) => {
     setAuthenticated,
     setSelectedTab,
     selectedTab,
+    setCurrentUser,
   } = props
 
   const toast = useToast()
@@ -36,9 +38,10 @@ const CustomDrawerContent = (props) => {
 
   useEffect(() => {
     readAuthData().then((response) => {
-      if (response?.token) {
-        axios.defaults.headers.common['Authorization'] = response.token
+      if (response?.email) {
         setAuthenticated(true)
+        setCurrentUser(response)
+        axios.defaults.params = { email: response.email, token: response.token }
       }
     })
   }, [isAuthenticated])
@@ -46,8 +49,9 @@ const CustomDrawerContent = (props) => {
   const logout = async () => {
     try {
       await AsyncStorage.removeItem('currentUser')
-      axios.defaults.headers.common['Authorization'] = null
       setAuthenticated(false)
+      setCurrentUser({})
+      axios.defaults.params = null
       toast.show('Succesfully logged out', { type: 'custom_success' })
       navigation.navigate('LoginScreen')
     } catch (e) {}
@@ -142,12 +146,14 @@ const mapStateToProps = (state) => {
   return {
     selectedTab: state.tabReducer.selectedTab,
     isAuthenticated: state.authReducer.isAuthenticated,
+    currentUser: state.authReducer.currentUser,
   }
 }
 
 const mapDispatchToProps = (dispatch) => ({
   setSelectedTab: (label) => dispatch(setSelectedTab(label)),
   setAuthenticated: (val) => dispatch(authenticate(val)),
+  setCurrentUser: (val) => dispatch(setCurrentUser(val)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(CustomDrawerContent)
