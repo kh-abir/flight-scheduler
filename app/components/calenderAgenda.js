@@ -17,6 +17,7 @@ const CalendarAgenda = (props) => {
   const [items, setItems] = useState({})
 
   const fetchAppointments = (date, period) => {
+    date = moment(date).format('YYYY-MM-DD')
     generateEmptyDate(date)
     if (items[date].length === 0) {
       setLoading(true)
@@ -127,12 +128,14 @@ const CalendarAgenda = (props) => {
     <Agenda
       // selected={selectedDate}
       items={items}
-      loadItemsForMonth={(day) => fetchAppointments(day.dateString, 'tableDay')}
+      loadItemsForMonth={(day) =>
+        fetchAppointments(day?.dateString, 'tableDay')
+      }
       renderItem={renderItem}
       renderEmptyDate={renderEmptyDate}
       onCalendarToggled={(calendarOpened) => setLoading(calendarOpened)}
-      onDayPress={(day) => fetchAppointments(day.dateString, 'agendaWeek')}
-      onDayChange={(day) => fetchAppointments(day.dateString, 'agendaWeek')}
+      onDayPress={(day) => fetchAppointments(day?.dateString, 'agendaWeek')}
+      onDayChange={(day) => fetchAppointments(day?.dateString, 'agendaWeek')}
       onRefresh={() => console.log('refreshing...')}
       refreshing={loading}
       // refreshControl={null}
