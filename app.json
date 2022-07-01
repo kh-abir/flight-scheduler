@@ -24,7 +24,9 @@
       "adaptiveIcon": {
         "foregroundImage": "./app/assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
-      }
+      },
+      "package": "com.therapymatellc.therapymate",
+      "versionCode": 2
     },
     "web": {
       "favicon": "./app/assets/favicon.png"
