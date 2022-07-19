@@ -21,6 +21,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import TherapymateLogo from '../components/TherapymateLogo'
 import { connect } from 'react-redux'
 import { authenticate, setCurrentUser } from '../stores/auth/authActions'
+import moment from 'moment'
 
 const LoginScreen = (props) => {
   const {
@@ -62,7 +63,9 @@ const LoginScreen = (props) => {
     axios
       .post('/sessions.json', {}, { params })
       .then((response) => {
-        saveAuthData('currentUser', response['data']).then((res) => {
+        let data = response['data']
+        data['login_time'] = moment().format()
+        saveAuthData('currentUser', data).then((res) => {
           setIsLoading(false)
           navigation.navigate('MainLayout')
         })

@@ -14,6 +14,7 @@ import axios from 'axios'
 import TherapymateLogo from '../../components/TherapymateLogo'
 import { useToast } from 'react-native-toast-notifications'
 import { BASE_URL_APP } from '@env'
+import moment from 'moment'
 
 const CustomDrawerContent = (props) => {
   const {
@@ -36,9 +37,12 @@ const CustomDrawerContent = (props) => {
     }
   }
 
+  const isLoggedIn = (login_time) => {
+    return moment().format() <= moment(login_time).add(30, 'minutes').format()
+  }
   useEffect(() => {
     readAuthData().then((response) => {
-      if (response?.email) {
+      if (response?.token && isLoggedIn(response?.login_time)) {
         setAuthenticated(true)
         setCurrentUser(response)
         axios.defaults.params = { email: response.email, token: response.token }
