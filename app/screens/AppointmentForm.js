@@ -135,6 +135,21 @@ const AppointmentForm = (props) => {
     scheduled_until: formatToMDT(scheduledUntil),
   })
 
+  const [errors, setErrors] = useState({
+    patient_id: Boolean(!(appointment?.patient_id || formObject?.patient_id)),
+    service_code_id: Boolean(
+      !(appointment?.service_code_id || formObject?.service_code_id),
+    ),
+    location_id: Boolean(
+      !(appointment?.location_id || formObject?.location_id),
+    ),
+  })
+
+  const isValidForm = () => {
+    const { patient_id, service_code_id, location_id } = errors
+    return Boolean(!(patient_id || service_code_id || location_id))
+  }
+
   const showPicker = (type) => {
     if (type == 'date') setShowDatePicker(true)
     else if (type == 'startTime') setShowStartTimePicker(true)
@@ -220,10 +235,16 @@ const AppointmentForm = (props) => {
   }
 
   const handleSubmit = () => {
-    if (formObject.id) {
-      updateAppointment()
+    if (isValidForm()) {
+      if (formObject.id) {
+        updateAppointment()
+      } else {
+        createAppointment()
+      }
     } else {
-      createAppointment()
+      toast.show('Required field is empty', {
+        type: 'custom_danger',
+      })
     }
   }
 
@@ -248,19 +269,6 @@ const AppointmentForm = (props) => {
           leftComponent={<BackButton navigation={navigation} />}
         />
 
-        {/* Clinician Dropdown
-        <CustomDropdown
-          open={clinicianDropDown}
-          setOpen={setClinicianDropDown}
-          label={'Clinician'}
-          value={clinician}
-          setValue={setClinician}
-          items={cliniciansList}
-          formFieldID={'clinician_id'}
-          formObject={formObject}
-          setFormObject={setFormObject}
-          searchPlaceholder={'Search Clinician...'}
-        /> */}
         {/* Code Modifier Dropdown */}
         <CustomDropdown
           open={codeModifierDropDown}
@@ -286,7 +294,15 @@ const AppointmentForm = (props) => {
           formObject={formObject}
           setFormObject={setFormObject}
           searchPlaceholder={'Search Client...'}
+          errors={errors}
+          setErrors={setErrors}
         />
+
+        {errors.patient_id && (
+          <View style={styles.errorContainer}>
+            <Text style={styles.errorMessage}>Client can not be empty</Text>
+          </View>
+        )}
         {/* Payer */}
         <View style={styles.inputView}>
           <TextInput
@@ -309,7 +325,16 @@ const AppointmentForm = (props) => {
           formObject={formObject}
           setFormObject={setFormObject}
           searchPlaceholder={'Search Service Code...'}
+          errors={errors}
+          setErrors={setErrors}
         />
+        {errors.service_code_id && (
+          <View style={styles.errorContainer}>
+            <Text style={styles.errorMessage}>
+              Service Code can not be empty
+            </Text>
+          </View>
+        )}
         {/* Units Dropdown */}
         <CustomDropdown
           open={unitsDropDown}
@@ -335,7 +360,14 @@ const AppointmentForm = (props) => {
           formObject={formObject}
           setFormObject={setFormObject}
           searchPlaceholder={'Search Location...'}
+          errors={errors}
+          setErrors={setErrors}
         />
+        {errors.location_id && (
+          <View style={styles.errorContainer}>
+            <Text style={styles.errorMessage}>Location can not be empty</Text>
+          </View>
+        )}
 
         {/* Display the selected date */}
         <CustomDatepicker
@@ -516,6 +548,16 @@ const styles = StyleSheet.create({
   textInput: {
     flex: 1,
     backgroundColor: COLORS.secondary,
+  },
+  errorContainer: {
+    alignSelf: 'flex-start',
+    marginLeft: 40,
+  },
+  errorMessage: {
+    color: COLORS.red,
+    marginTop: -20,
+    paddingBottom: 10,
+    fontWeight: 'normal',
   },
 })
 

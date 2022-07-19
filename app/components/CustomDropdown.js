@@ -17,12 +17,24 @@ const CustomDropdown = ({
   searchPlaceholder,
   formObject,
   setFormObject,
+  errors,
+  setErrors,
 }) => {
   const handleSelectItem = (item) => {
     setFormObject({
       ...formObject,
       [formFieldID]: item.id,
     })
+    if (
+      formFieldID == 'patient_id' ||
+      formFieldID == 'service_code_id' ||
+      formFieldID == 'location_id'
+    ) {
+      setErrors({
+        ...errors,
+        [formFieldID]: false,
+      })
+    }
   }
 
   return (
