@@ -7,12 +7,12 @@ import {
   SafeAreaView,
   Appearance,
   useColorScheme,
+  Alert,
 } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
-import { MaterialCommunityIcons } from '@expo/vector-icons'
+import { AntDesign, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
 import Animated from 'react-native-reanimated'
 import { COLORS } from '../constants/theme'
-import { BASE_URL_APP } from '@env'
 import axios from 'axios'
 import Loader from '../components/Loader'
 import { TextInput, Switch } from 'react-native-paper'
@@ -22,6 +22,7 @@ import TherapymateLogo from '../components/TherapymateLogo'
 import { connect } from 'react-redux'
 import { authenticate, setCurrentUser } from '../stores/auth/authActions'
 import moment from 'moment'
+import _ from 'underscore'
 
 const LoginScreen = (props) => {
   const {
@@ -30,11 +31,9 @@ const LoginScreen = (props) => {
     isAuthenticated,
     setAuthenticated,
     setCurrentUser,
-    currentUser,
   } = props
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [rememberMe, setRememberMe] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const isDarkMode = useColorScheme() == 'dark'
   const toast = useToast()
@@ -49,17 +48,52 @@ const LoginScreen = (props) => {
     }
   }
 
+  const [users, setUsers] = useState()
   useEffect(() => {
+    AsyncStorage.getItem('users').then((res) => {
+      setUsers(JSON.parse(res))
+    })
     setIsLoading(false)
     isAuthenticated ? navigation.navigate('MainLayout') : null
   }, [isAuthenticated])
 
-  const [isEnabled, setIsEnabled] = useState(false)
-  const toggleSwitch = () => setIsEnabled((previousState) => !previousState)
+  const initiateLogin = () => {
+    if (email && password) {
+      Alert.alert(
+        'Save your login information',
+        'Next time you log in on this device, just tap your email instead of typing a password',
+        [
+          {
+            text: 'Ask me later',
+            onPress: () => proceedToLogin('Ask me later'),
+          },
+          { text: 'Save', onPress: () => proceedToLogin('Save') },
+        ],
+      )
+    } else {
+      toast.show("Email or password can't be blank", {
+        type: 'custom_danger',
+      })
+    }
+  }
 
-  const login = () => {
+  const proceedToLogin = (rememberPassword) => {
+    const user = { username: email, password: password }
+    if (
+      rememberPassword == 'Save' &&
+      _.find(users, { username: email }) == undefined
+    ) {
+      let currentUsers = users || []
+      currentUsers.push(user)
+      setUsers(currentUsers)
+      AsyncStorage.setItem('users', JSON.stringify(currentUsers))
+    }
+    login(user)
+  }
+
+  const login = (user) => {
     setIsLoading(true)
-    const params = { username: email, password: password }
+    const params = user
     axios
       .post('/sessions.json', {}, { params })
       .then((response) => {
@@ -82,34 +116,50 @@ const LoginScreen = (props) => {
       })
   }
 
+  const loginAs = (username, password) => {
+    login({ username: username, password: password })
+  }
+
+  const deleteSavedCredentials = (username, password) => {
+    Alert.alert(
+      'Remove account from this device?',
+      "You'll need to enter your email and password manually to log in again",
+      [
+        {
+          text: 'Cancel',
+          onPress: () => deleteCredentials('Cancel'),
+        },
+        {
+          text: 'Remove Account',
+          onPress: () => deleteCredentials('Remove Account', username),
+        },
+      ],
+    )
+  }
+
+  const deleteCredentials = (deletionState, username = null) => {
+    if (deletionState == 'Remove Account') {
+      let currentUsers = users
+      currentUsers = currentUsers.filter((user) => user.username != username)
+      currentUsers = currentUsers.length ? currentUsers : null
+      setUsers(currentUsers)
+      AsyncStorage.setItem('users', JSON.stringify(currentUsers))
+    }
+  }
+
   return (
-    <Animated.View
-      style={{
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: COLORS.secondary,
-        ...drawerAnimationStyle,
-      }}
-    >
-      <SafeAreaView style={styles.container}>
-        <ScrollView
-          style={{ width: '100%' }}
-          contentContainerStyle={{
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexGrow: 1,
-          }}
-        >
-          <Loader isLoading={isLoading} />
+    <Animated.View style={[animatedView, drawerAnimationStyle]}>
+      <SafeAreaView style={container}>
+        <Loader isLoading={isLoading} />
+        <ScrollView style={scrollView} contentContainerStyle={scrollContent}>
           <TherapymateLogo />
-          <View style={styles.inputView}>
+          <View style={inputView}>
             <TextInput
               mode="flat"
               label="Email"
               caretHidden={false}
               keyboardType="email-address"
-              style={styles.TextInput}
+              style={textInput}
               activeUnderlineColor={COLORS.blue}
               underlineColor={COLORS.blue1}
               placeholder="Enter Your Email"
@@ -120,18 +170,18 @@ const LoginScreen = (props) => {
                 <TextInput.Icon
                   onPress={console.log()}
                   name={'email-outline'}
-                  size={30}
+                  size={25}
                   color={COLORS.blue1}
                 />
               }
             />
           </View>
 
-          <View style={styles.inputView}>
+          <View style={inputView}>
             <TextInput
               mode="flat"
               label="Password"
-              style={styles.TextInput}
+              style={textInput}
               activeUnderlineColor={COLORS.blue}
               underlineColor={COLORS.blue1}
               placeholder="Enter Your Password"
@@ -143,33 +193,49 @@ const LoginScreen = (props) => {
                 <TextInput.Icon
                   onPress={console.log()}
                   name={'lock-outline'}
-                  size={30}
+                  size={25}
                   color={COLORS.blue1}
                 />
               }
             />
           </View>
 
-          <View style={{ ...styles.loginAsBtnWrap, justifyContent: 'center' }}>
-            <Switch onValueChange={toggleSwitch} value={isEnabled} />
-            <Text style={styles.rememberMeText}>Remember Me</Text>
-
-            <TouchableOpacity style={{ marginLeft: 35 }}>
-              <Text style={styles.forgot_button}>Forgot Password?</Text>
-            </TouchableOpacity>
-          </View>
-
-          <TouchableOpacity
-            onPress={login}
-            style={{ ...styles.loginBtn, marginTop: 0 }}
-          >
+          <TouchableOpacity style={loginBtn} onPress={initiateLogin}>
             <MaterialCommunityIcons
               name="login"
               size={25}
               color={COLORS.blue1}
             />
-            <Text style={styles.loginText}>LOGIN</Text>
+            <Text style={loginText}>LOGIN</Text>
           </TouchableOpacity>
+
+          {users && (
+            <View style={loginAsContainer}>
+              <View style={loginDivider}>
+                <Text style={loginDividerText}>OR</Text>
+              </View>
+              <Text style={loginAsText}>Continue with</Text>
+              {users.map((user, idx) => {
+                return (
+                  <TouchableOpacity
+                    key={idx}
+                    style={loginAsBtn}
+                    onPress={() => {
+                      loginAs(user.username, user.password)
+                    }}
+                    onLongPress={() => deleteSavedCredentials(user.username)}
+                  >
+                    <Text style={loginAsBtnText}>{user.username}</Text>
+                    <TouchableOpacity
+                      onPress={() => deleteSavedCredentials(user.username)}
+                    >
+                      <Ionicons name="close" size={25} color={COLORS.blue1} />
+                    </TouchableOpacity>
+                  </TouchableOpacity>
+                )
+              })}
+            </View>
+          )}
         </ScrollView>
       </SafeAreaView>
     </Animated.View>
@@ -177,52 +243,45 @@ const LoginScreen = (props) => {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  animatedView: {
     flex: 1,
-    backgroundColor: '#CDE6F9',
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: COLORS.secondary,
+  },
+  container: {
+    backgroundColor: COLORS.secondary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+  },
+  scrollView: {
+    width: '90%',
+    height: '100%',
+  },
+  scrollContent: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexGrow: 1,
+    backgroundColor: COLORS.secondary,
   },
   inputView: {
     width: '90%',
-    marginBottom: 20,
-    margin: 2,
   },
-
-  textBoxIcon: {
-    paddingTop: 16,
-    paddingRight: 10,
-  },
-
-  TextInput: {
-    height: 56,
+  textInput: {
+    height: 50,
     backgroundColor: COLORS.secondary,
   },
-
-  forgot_button: {
-    height: 30,
-    marginBottom: 10,
-    paddingTop: 8,
-    color: 'blue',
-  },
-
-  rememberMeText: {
-    color: COLORS.blue1,
-    fontWeight: '600',
-    paddingTop: 8,
-    marginLeft: 3,
-  },
-
   loginBtn: {
     width: '100%',
-    borderRadius: 10,
-    height: 50,
+    borderRadius: 6,
+    height: 45,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 10,
+    marginTop: 20,
     backgroundColor: COLORS.blue2,
-    shadowColor: '#000',
+    shadowColor: COLORS.black,
     shadowOffset: {
       width: -2,
       height: 2,
@@ -237,51 +296,67 @@ const styles = StyleSheet.create({
     fontSize: 17,
     color: COLORS.blue1,
   },
+  loginAsContainer: {
+    marginTop: 15,
+    width: '100%',
+  },
+  loginDivider: {
+    borderTopWidth: 1,
+    borderColor: COLORS.gray,
+    marginTop: 15,
+  },
+  loginDividerText: {
+    top: -15,
+    alignSelf: 'center',
+    backgroundColor: COLORS.secondary,
+    paddingHorizontal: 10,
+    fontSize: 20,
+    color: COLORS.blue1,
+  },
   loginAsText: {
+    alignSelf: 'center',
     fontWeight: 'bold',
-    marginLeft: 5,
-    color: '#000',
-    maxWidth: 250,
-  },
-  loginAs: {
-    marginTop: 30,
-    fontWeight: 'bold',
-    textTransform: 'uppercase',
-    color: 'black',
-  },
-  loginAsBtnWrap: {
-    width: '90%',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 0,
-    marginBottom: 10,
+    fontSize: 18,
+    color: COLORS.blue1,
   },
   loginAsBtn: {
-    flex: 1,
-    height: 50,
-    alignItems: 'center',
+    height: 45,
+    width: '90%',
+    marginTop: 10,
+    paddingHorizontal: 10,
+    borderRadius: 6,
     flexDirection: 'row',
-    justifyContent: 'flex-start',
-    width: '80%',
-    borderRadius: 20,
-    backgroundColor: '#88CBF1',
-    color: '#000',
-    paddingLeft: 10,
-    shadowColor: 'rgba(0, 0, 0, 0.1)',
-    shadowOpacity: 0.8,
-    elevation: 6,
-    shadowRadius: 15,
-    shadowOffset: { width: 1, height: 13 },
-  },
-  loginAsDelBtn: {
-    height: 50,
+    alignSelf: 'center',
     alignItems: 'center',
-    justifyContent: 'center',
-    width: '10%',
-    marginLeft: 10,
+    justifyContent: 'space-between',
+    backgroundColor: COLORS.lightBlue,
+    shadowColor: COLORS.black,
+    shadowOffset: { width: -2, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  loginAsBtnText: {
+    fontSize: 18,
+    color: COLORS.black,
   },
 })
-
+const {
+  animatedView,
+  container,
+  scrollView,
+  scrollContent,
+  inputView,
+  textInput,
+  loginBtn,
+  loginText,
+  loginAsContainer,
+  loginDivider,
+  loginDividerText,
+  loginAsText,
+  loginAsBtn,
+  loginAsBtnText,
+} = styles
 const mapStateToProps = (state) => {
   return {
     selectedTab: state.tabReducer.selectedTab,
@@ -289,10 +364,8 @@ const mapStateToProps = (state) => {
     currentUser: state.authReducer.currentUser,
   }
 }
-
 const mapDispatchToProps = (dispatch) => ({
   setAuthenticated: (val) => dispatch(authenticate(val)),
   setCurrentUser: (val) => dispatch(setCurrentUser(val)),
 })
-
 export default connect(mapStateToProps, mapDispatchToProps)(LoginScreen)
