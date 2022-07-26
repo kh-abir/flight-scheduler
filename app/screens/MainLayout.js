@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { connect } from 'react-redux'
+import { connect, useDispatch } from 'react-redux'
 import Animated from 'react-native-reanimated'
 import { View, StyleSheet } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -16,9 +16,10 @@ import { setSelectedTab } from '../stores/tab/tabActions'
 const MainLayout = (props) => {
   const { selectedTab, navigation, drawerAnimationStyle } = props
   const isOpen = useIsDrawerOpen()
+  const dispatch = useDispatch()
 
   useEffect(() => {
-    setSelectedTab('Home')
+    dispatch(setSelectedTab('Home'))
   }, [])
 
   return (
@@ -46,7 +47,7 @@ const MainLayout = (props) => {
               icon={icon}
               isFocused={selectedTab === label}
               onPress={() => {
-                setSelectedTab(label)
+                dispatch(setSelectedTab(label))
                 navigation.navigate(screen)
               }}
             />
@@ -97,8 +98,4 @@ const mapStateToProps = (state) => {
   }
 }
 
-const mapDispatchToProps = (dispatch) => ({
-  setSelectedTab: (label) => dispatch(setSelectedTab(label)),
-})
-
-export default connect(mapStateToProps, mapDispatchToProps)(MainLayout)
+export default connect(mapStateToProps)(MainLayout)
