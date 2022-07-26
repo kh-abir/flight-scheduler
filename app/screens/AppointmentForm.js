@@ -242,7 +242,7 @@ const AppointmentForm = (props) => {
         createAppointment()
       }
     } else {
-      toast.show('Required field is empty', {
+      toast.show('Required field can not be empty', {
         type: 'custom_danger',
       })
     }
@@ -300,7 +300,7 @@ const AppointmentForm = (props) => {
 
         {errors.patient_id && (
           <View style={styles.errorContainer}>
-            <Text style={styles.errorMessage}>Client can not be empty</Text>
+            <Text style={styles.errorMessage}>Client is required</Text>
           </View>
         )}
         {/* Payer */}
@@ -330,9 +330,7 @@ const AppointmentForm = (props) => {
         />
         {errors.service_code_id && (
           <View style={styles.errorContainer}>
-            <Text style={styles.errorMessage}>
-              Service Code can not be empty
-            </Text>
+            <Text style={styles.errorMessage}>Service Code is required</Text>
           </View>
         )}
         {/* Units Dropdown */}
@@ -365,7 +363,7 @@ const AppointmentForm = (props) => {
         />
         {errors.location_id && (
           <View style={styles.errorContainer}>
-            <Text style={styles.errorMessage}>Location can not be empty</Text>
+            <Text style={styles.errorMessage}>Location is required</Text>
           </View>
         )}
 
@@ -520,7 +518,7 @@ const styles = StyleSheet.create({
 
   loginBtn: {
     width: '90%',
-    borderRadius: 10,
+    borderRadius: 6,
     height: 40,
     flexDirection: 'row',
     alignItems: 'center',
@@ -554,7 +552,7 @@ const styles = StyleSheet.create({
     marginLeft: 40,
   },
   errorMessage: {
-    color: COLORS.red,
+    color: COLORS.darkRed,
     marginTop: -20,
     paddingBottom: 10,
     fontWeight: 'normal',
