@@ -4,7 +4,7 @@ import { View, Text, Image, TouchableOpacity } from 'react-native'
 import { createDrawerNavigator } from '@react-navigation/drawer'
 
 import { COLORS } from '../../constants/theme'
-import MainLayout from '../../../MainLayout'
+import MainLayout from '../../screens/MainLayout'
 import Animated from 'react-native-reanimated'
 import CustomDrawerContent from './CustomDrawerContent'
 import HomeScreen from '../../screens/HomeScreen'
