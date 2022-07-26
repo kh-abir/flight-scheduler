@@ -1,11 +1,10 @@
-import React, { useState } from 'react'
-import { View, Text, Image, TouchableOpacity } from 'react-native'
-
+import { useState } from 'react'
+import { View } from 'react-native'
+import Animated from 'react-native-reanimated'
 import { createDrawerNavigator } from '@react-navigation/drawer'
 
 import { COLORS } from '../../constants/theme'
 import MainLayout from '../../screens/MainLayout'
-import Animated from 'react-native-reanimated'
 import CustomDrawerContent from './CustomDrawerContent'
 import HomeScreen from '../../screens/HomeScreen'
 import SettingsScreen from '../../screens/SettingsScreen'
@@ -16,12 +15,10 @@ import ClientsScreen from '../../screens/ClientsScreen'
 import NewClientScreen from '../../screens/NewClientScreen'
 import PaymentsScreen from '../../screens/PaymentsScreen'
 import NewPaymentScreen from '../../screens/NewPaymentScreen'
-import AppInfoScreen from '../../screens/AppInfoScreen'
 import AppointmentForm from '../../screens/AppointmentForm'
 import ClientForm from '../../screens/ClientForm'
 
 const Drawer = createDrawerNavigator()
-
 const CustomDrawer = () => {
   const [progress, setProgress] = useState(new Animated.Value(0))
   const scale = Animated.interpolateNode(progress, {
