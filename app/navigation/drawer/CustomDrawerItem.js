@@ -3,10 +3,15 @@ import { COLORS, SIZES } from '../../constants/theme'
 import React from 'react'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 
-const CustomDrawerItem = ({ label, icon, iconType, isFocused, onPress }) => {
-  const backgroundColor = isFocused ? COLORS.transparentBlack1 : null
+const CustomDrawerItem = ({ label, icon, isFocused, onPress }) => {
   return (
-    <TouchableOpacity style={[container, backgroundColor]} onPress={onPress}>
+    <TouchableOpacity
+      style={[
+        container,
+        isFocused ? { backgroundColor: COLORS.transparentBlack1 } : null,
+      ]}
+      onPress={onPress}
+    >
       <MaterialCommunityIcons name={icon} size={25} color="black" />
       <Text style={itemLabel}>{label}</Text>
     </TouchableOpacity>
