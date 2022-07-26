@@ -149,95 +149,89 @@ const LoginScreen = (props) => {
 
   return (
     <Animated.View style={[animatedView, drawerAnimationStyle]}>
-      <SafeAreaView style={container}>
-        <Loader isLoading={isLoading} />
-        <ScrollView style={scrollView} contentContainerStyle={scrollContent}>
-          <TherapymateLogo />
-          <View style={inputView}>
-            <TextInput
-              mode="flat"
-              label="Email"
-              caretHidden={false}
-              keyboardType="email-address"
-              style={textInput}
-              activeUnderlineColor={COLORS.blue}
-              underlineColor={COLORS.blue1}
-              placeholder="Enter Your Email"
-              placeholderTextColor={COLORS.blue1}
-              value={email}
-              onChangeText={setEmail}
-              right={
-                <TextInput.Icon
-                  onPress={console.log()}
-                  name={'email-outline'}
-                  size={25}
-                  color={COLORS.blue1}
-                />
-              }
-            />
-          </View>
+      <Loader isLoading={isLoading} />
+      <ScrollView style={scrollView} contentContainerStyle={scrollContent}>
+        <TherapymateLogo />
+        <View style={inputView}>
+          <TextInput
+            mode="flat"
+            label="Email"
+            caretHidden={false}
+            keyboardType="email-address"
+            style={textInput}
+            activeUnderlineColor={COLORS.blue}
+            underlineColor={COLORS.blue1}
+            placeholder="Enter Your Email"
+            placeholderTextColor={COLORS.blue1}
+            value={email}
+            onChangeText={setEmail}
+            right={
+              <TextInput.Icon
+                onPress={console.log()}
+                name={'email-outline'}
+                size={25}
+                color={COLORS.blue1}
+              />
+            }
+          />
+        </View>
 
-          <View style={inputView}>
-            <TextInput
-              mode="flat"
-              label="Password"
-              style={textInput}
-              activeUnderlineColor={COLORS.blue}
-              underlineColor={COLORS.blue1}
-              placeholder="Enter Your Password"
-              placeholderTextColor={COLORS.blue1}
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              right={
-                <TextInput.Icon
-                  onPress={console.log()}
-                  name={'lock-outline'}
-                  size={25}
-                  color={COLORS.blue1}
-                />
-              }
-            />
-          </View>
+        <View style={inputView}>
+          <TextInput
+            mode="flat"
+            label="Password"
+            style={textInput}
+            activeUnderlineColor={COLORS.blue}
+            underlineColor={COLORS.blue1}
+            placeholder="Enter Your Password"
+            placeholderTextColor={COLORS.blue1}
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            right={
+              <TextInput.Icon
+                onPress={console.log()}
+                name={'lock-outline'}
+                size={25}
+                color={COLORS.blue1}
+              />
+            }
+          />
+        </View>
 
-          <TouchableOpacity style={loginBtn} onPress={initiateLogin}>
-            <MaterialCommunityIcons
-              name="login"
-              size={25}
-              color={COLORS.blue1}
-            />
-            <Text style={loginText}>LOGIN</Text>
-          </TouchableOpacity>
+        <TouchableOpacity style={loginBtn} onPress={initiateLogin}>
+          <MaterialCommunityIcons name="login" size={25} color={COLORS.blue1} />
+          <Text style={loginText}>LOGIN</Text>
+        </TouchableOpacity>
 
-          {users && (
-            <View style={loginAsContainer}>
-              <View style={loginDivider}>
-                <Text style={loginDividerText}>OR</Text>
-              </View>
-              <Text style={loginAsText}>Continue with</Text>
-              {users.map((user, idx) => {
-                return (
-                  <TouchableOpacity
-                    key={idx}
-                    style={loginAsBtn}
-                    onPress={() => {
-                      loginAs(user.username, user.password)
-                    }}
-                    onLongPress={() => deleteSavedCredentials(user.username)}
-                  >
-                    <Text style={loginAsBtnText}>{user.username}</Text>
-                    <TouchableOpacity
-                      onPress={() => deleteSavedCredentials(user.username)}
-                    >
-                      <Ionicons name="close" size={25} color={COLORS.blue1} />
-                    </TouchableOpacity>
-                  </TouchableOpacity>
-                )
-              })}
+        {users && (
+          <View style={loginAsContainer}>
+            <View style={loginDivider}>
+              <Text style={loginDividerText}>OR</Text>
             </View>
-          )}
-        </ScrollView>
-      </SafeAreaView>
+            <Text style={loginAsText}>Continue with</Text>
+            {users.map((user, idx) => {
+              return (
+                <TouchableOpacity
+                  key={idx}
+                  style={loginAsBtn}
+                  onPress={() => {
+                    loginAs(user.username, user.password)
+                  }}
+                  onLongPress={() => deleteSavedCredentials(user.username)}
+                >
+                  <Text style={loginAsBtnText}>{user.username}</Text>
+                  <TouchableOpacity
+                    onPress={() => deleteSavedCredentials(user.username)}
+                  >
+                    <Ionicons name="close" size={25} color={COLORS.blue1} />
+                  </TouchableOpacity>
+                </TouchableOpacity>
+              )
+            })}
+          </View>
+        )}
+      </ScrollView>
     </Animated.View>
   )
 }
@@ -248,12 +242,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: COLORS.secondary,
-  },
-  container: {
-    backgroundColor: COLORS.secondary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
   },
   scrollView: {
     width: '90%',
@@ -343,7 +331,6 @@ const styles = StyleSheet.create({
 })
 const {
   animatedView,
-  container,
   scrollView,
   scrollContent,
   inputView,
