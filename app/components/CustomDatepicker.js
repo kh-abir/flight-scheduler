@@ -46,7 +46,7 @@ const CustomDatepicker = ({
         isVisible={show}
         date={new Date(value)}
         mode={mode}
-        display={'spinner'}
+        display={Platform.OS === 'ios' ? 'spinner' : 'default'}
         onConfirm={onConfirm}
         onCancel={onCancel}
       />
